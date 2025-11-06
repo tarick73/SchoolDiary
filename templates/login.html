@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Login</title></head>
+<body>
+{% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+<form action="{% url 'login' %}" method="post">
+    {% csrf_token %}
+    <input type="text"     name="username" placeholder="Username" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+    <button type="submit">Sign in</button>
+</form>
+</body>
+</html>

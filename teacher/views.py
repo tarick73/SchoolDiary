@@ -7,9 +7,9 @@ def teacher_dashboard():
 def create_lesson():
     pass
 
-def lesson_details():
+def lesson_details(request, lesson_id):
     pass
 
-def set_grade():
+def set_grade(request, lesson_id):
     pass
 
