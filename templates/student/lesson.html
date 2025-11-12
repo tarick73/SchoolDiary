@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ lesson.name }}</title>
+</head>
+<body>
+<h1>{{ lesson.name }}</h1>
+
+<div>
+    <div><b>Date:</b> {{ lesson.date }}</div>
+    <div><b>Teacher:</b> {{ lesson.teacher.get_full_name|default:lesson.teacher.username }}</div>
+    <div><b>Room:</b> {{ lesson.room|default:"—" }}</div>
+    <div><b>Description:</b> {{ lesson.description|default:"—" }}</div>
+    <div><b>Homework:</b> {{ lesson.homework|default:"—" }}</div>
+</div>
+
+<hr>
+
+<h3>My grade</h3>
+{% if my_grade %}
+    <p><b>{{ my_grade.grade }}</b></p>
+{% else %}
+    <p>Not graded yet.</p>
+{% endif %}
+
+<p><a href="/student/lessons/">← Back to lessons</a></p>
+<p><a href="/student/my-grades/">My grades</a></p>
+</body>
+</html>

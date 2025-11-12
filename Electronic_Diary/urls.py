@@ -13,6 +13,6 @@ urlpatterns = [
     path('logout/',   common_data.views.logout_handler,   name='logout'),
     path('register/', common_data.views.register_handler, name='register'),
     path('profile/',  common_data.views.profile_view,     name='profile'),
-    path("student/", include("student.urls")),
+    path("student/", include(("student.urls", "student"), namespace="student")),
     path("teacher/", include("teacher.urls")),
 ]

@@ -1,14 +1,61 @@
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Avg
+from common_data.models import Lesson, Grade, StudentClass
 
-# Create your views here.
+@login_required
+def student_main_page(request):
+    return redirect('student_lessons')
 
-def student_main_page():
-    pass
+@login_required
+def lessons_list(request):
+    sc = (StudentClass.objects
+          .select_related('sclass')
+          .filter(student=request.user)
+          .first())
 
-def lessons_list():
-    pass
+    if not sc:
+        return render(request, 'student/lessons.html', {
+            'lessons': [],
+            'no_class': True
+        })
 
-def lesson_details():
-    pass
-def my_grades():
-    pass
+    lessons = (Lesson.objects
+               .select_related('teacher', 'sclass')
+               .filter(sclass=sc.sclass)
+               .order_by('-date', '-id'))
+
+    return render(request, 'student/lessons.html', {
+        'lessons': lessons,
+        'no_class': False
+    })
+
+@login_required
+def lesson_details(request, lesson_id):
+    lesson = get_object_or_404(
+        Lesson.objects.select_related('teacher', 'sclass'),
+        pk=lesson_id
+    )
+
+    my_grade = Grade.objects.filter(student=request.user, lesson=lesson).first()
+
+    return render(request, 'student/lesson.html', {
+        'lesson': lesson,
+        'my_grade': my_grade,
+    })
+
+@login_required
+def my_grades(request):
+    grades_qs = (Grade.objects
+                 .select_related('lesson', 'lesson__teacher', 'lesson__sclass')
+                 .filter(student=request.user)
+                 .order_by('-lesson__date', '-id'))
+
+    avg_grade = grades_qs.aggregate(avg=Avg('grade'))['avg']
+
+    return render(request, 'student/my_grades.html', {
+        'grades': grades_qs,
+        'avg_grade': avg_grade,
+    })
+def student_main_page(request):
+    return redirect('student:student_lessons')
