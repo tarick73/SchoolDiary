@@ -37,12 +37,23 @@ class Lessons(View):
 
 
 def lesson_details(request, lesson_id):
-    if request.method == 'GET':
-        current_lesson = get_object_or_404(Lesson, pk=lesson_id)
-        grades = Grade.objects.filter(lesson=current_lesson).select_related('student')
-        return render(request, "teacher/lesson.html", {"lesson": current_lesson, "grades": grades})
-    return None
+    lesson = get_object_or_404(Lesson, pk=lesson_id)
 
+    grades = (Grade.objects
+              .filter(lesson=lesson)
+              .select_related('student')
+              .order_by('student__last_name', 'student__first_name', 'student__username'))
+
+    students = (StudentClass.objects
+                .filter(sclass=lesson.sclass)
+                .select_related('student')
+                .order_by('student__last_name', 'student__first_name', 'student__username'))
+
+    return render(request, "teacher/lesson.html", {
+        "lesson": lesson,
+        "grades": grades,
+        "students": students,
+    })
 
 def set_grade(request, lesson_id):
     if request.method == "POST":

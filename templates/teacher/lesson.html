@@ -2,15 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Lesson {{ lesson.name}}</title>
+    <title>Lesson {{ lesson.name }}</title>
 </head>
 <body>
-    <div>
-        <span>{{ lesson.name}}</span>
-        <span>{{ lesson.description}}</span>
-        <span>{{ lesson.date}}</span>
-        <span>{{ lesson.homework}}</span>
-        <span>{{ lesson.room}}</span>
-    </div>
+<div>
+    <span>{{ lesson.name }}</span>
+    <span>{{ lesson.description }}</span>
+    <span>{{ lesson.date }}</span>
+    <span>{{ lesson.homework }}</span>
+    <span>{{ lesson.room }}</span>
+</div>
+
+<form action="/teacher/lessons/{{ lesson.id }}/set_grade/" method="post">
+    {% csrf_token %}
+    <select name="student_id">
+        {% for student in students %}
+            <option value="{{ student.student.id }}">
+                {{ student.student.get_full_name|default:student.student.username }}
+            </option>
+        {% endfor %}
+    </select>
+    <input type="text" name="grade" placeholder="Grade">
+    <input type="submit" value="Set grade">
+</form>
+
+<h3>Grades</h3>
+<ul>
+    {% for g in grades %}
+        <li>
+            {{ g.student.get_full_name|default:g.student.username }} — {{ g.grade }}
+        </li>
+    {% empty %}
+        <li>No grades, yet</li>
+    {% endfor %}
+</ul>
 </body>
 </html>
