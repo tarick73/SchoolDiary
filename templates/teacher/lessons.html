@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lessons</title>
+</head>
+<body>
+<h1>Add lesson:</h1>
+
+<form action="/teacher/lessons/" method="post">
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="name">
+    <input type="text" name="description" placeholder="description">
+    <input type="date" name="date" placeholder="date">
+    <input type="text" name="homework" placeholder="homework">
+    <input type="text" name="room" placeholder="room">
+
+    <select name="sclass_id">
+        {% for current_class in classes %}
+            <option value="{{ current_class.id }}">
+                {{ current_class.name|default:current_class.class_name|default:current_class }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <input type="submit" value="Add">
+</form>
+
+{% for lesson in lessons %}  <!-- было all_lessons -->
+    <div id="lesson_{{ lesson.id }}">
+        <span>{{ lesson.name }}</span>
+        <span>{{ lesson.description }}</span>
+        <span>{{ lesson.date }}</span>
+        <span>{{ lesson.homework }}</span>
+        <span>{{ lesson.room }}</span>
+    </div>
+{% endfor %}
+</body>
+</html>

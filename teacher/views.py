@@ -1,15 +1,56 @@
-from django.shortcuts import render
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views import View
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
-# Create your views here.
-def teacher_dashboard():
-    pass
+from common_data.models import Lesson, StudentClass, Grade, SchoolClass
 
-def create_lesson():
-    pass
+
+@login_required
+def teacher_dashboard(request):
+    return redirect('lessons')
+
+
+@method_decorator(login_required, name='dispatch')
+class Lessons(View):
+    def get(self, request, *args, **kwargs):
+        lessons = Lesson.objects.all().select_related('teacher')
+        classes = SchoolClass.objects.all()
+        return render(request, "teacher/lessons.html", {"lessons": lessons, "classes": classes})
+
+    def post(self, request, *args, **kwargs):
+        current_class_id = int(request.POST["sclass_id"])
+        current_class = get_object_or_404(SchoolClass, pk=current_class_id)
+
+        lesson = Lesson(
+            name=request.POST["name"].strip(),
+            description=request.POST.get("description", "").strip(),
+            date=request.POST["date"],
+            homework=request.POST.get("homework", "").strip(),
+            room=request.POST.get("room", "").strip(),
+            teacher=request.user,
+            sclass=current_class,
+        )
+        lesson.save()
+        return redirect(f"/teacher/lessons/#lesson_{lesson.id}")
+
 
 def lesson_details(request, lesson_id):
-    pass
+    if request.method == 'GET':
+        current_lesson = get_object_or_404(Lesson, pk=lesson_id)
+        grades = Grade.objects.filter(lesson=current_lesson).select_related('student')
+        return render(request, "teacher/lesson.html", {"lesson": current_lesson, "grades": grades})
+    return None
+
 
 def set_grade(request, lesson_id):
-    pass
-
+    if request.method == "POST":
+        current_student = get_object_or_404(User, pk=int(request.POST["student_id"]))
+        current_grade = Grade(
+            grade=int(request.POST["grade"]),
+            student=current_student,
+            lesson=get_object_or_404(Lesson, pk=lesson_id),
+        )
+        current_grade.save()
+        return redirect(f"/teacher/lessons/{lesson_id}/")

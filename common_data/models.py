@@ -16,11 +16,11 @@ class StudentClass(models.Model):
 
 class Lesson(models.Model):
     name = models.CharField(max_length=200)
-    description = models.TextField
-    date = models.DateField
+    description = models.TextField(blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
     teacher = ForeignKey(User, on_delete=models.CASCADE)
     sclass = ForeignKey(SchoolClass, on_delete=models.CASCADE)
-    homework = models.TextField
+    homework = models.TextField(blank=True, null=True)
     room = models.CharField(max_length=200)
     lesson_type = models.IntegerField(null=True, blank=True)
 
