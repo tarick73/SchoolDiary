@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 
 
@@ -29,6 +29,7 @@ def register_handler(request):
         last_name  = request.POST.get('lastname', '')
         email      = request.POST.get('email', '')
         password   = request.POST.get('password', '')
+        user_group = request.POST.get('user_group', '')
 
         if User.objects.filter(username=username).exists():
             return render(request, 'register.html', {'error': 'Username already exists'})
@@ -37,6 +38,14 @@ def register_handler(request):
             username=username, email=email, password=password,
             first_name=first_name, last_name=last_name
         )
+        if user_group =="teacher":
+            user.groups.add(Group.objects.get(name='teacher'))
+            user.is_active = False
+        else:
+            user.groups.add(Group.objects.get(name='student'))
+
+        user.save()
+
         return redirect('login')
 
     return render(request, 'register.html')

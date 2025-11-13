@@ -1,12 +1,27 @@
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Avg
 from common_data.models import Lesson, Grade, StudentClass
 
+
+def user_should_be_a_teacher(func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("/login/")
+        if not request.user.groups.filter(name='student').exists():
+            raise PermissionDenied("You must be a teacher to access this page.")
+        return func(request, *args, **kwargs)
+    return wrapper
+
+
+
+@user_should_be_a_teacher
 @login_required
 def student_main_page(request):
     return redirect('student_lessons')
 
+@user_should_be_a_teacher
 @login_required
 def lessons_list(request):
     sc = (StudentClass.objects
@@ -30,6 +45,7 @@ def lessons_list(request):
         'no_class': False
     })
 
+@user_should_be_a_teacher
 @login_required
 def lesson_details(request, lesson_id):
     lesson = get_object_or_404(
@@ -44,6 +60,7 @@ def lesson_details(request, lesson_id):
         'my_grade': my_grade,
     })
 
+@user_should_be_a_teacher
 @login_required
 def my_grades(request):
     grades_qs = (Grade.objects
@@ -57,5 +74,7 @@ def my_grades(request):
         'grades': grades_qs,
         'avg_grade': avg_grade,
     })
+
+@user_should_be_a_teacher
 def student_main_page(request):
     return redirect('student:student_lessons')

@@ -1,10 +1,21 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from common_data.models import Lesson, StudentClass, Grade, SchoolClass
+
+
+def user_should_be_a_teacher(func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("/login/")
+        if not request.user.groups.filter(name='teacher').exists():
+            raise PermissionDenied("You must be a teacher to access this page.")
+        return func(request, *args, **kwargs)
+    return wrapper
 
 
 @login_required
@@ -14,12 +25,17 @@ def teacher_dashboard(request):
 
 @method_decorator(login_required, name='dispatch')
 class Lessons(View):
-    def get(self, request, *args, **kwargs):
+    @staticmethod
+    @user_should_be_a_teacher
+    def get(request, *args, **kwargs):
+
         lessons = Lesson.objects.all().select_related('teacher')
         classes = SchoolClass.objects.all()
         return render(request, "teacher/lessons.html", {"lessons": lessons, "classes": classes})
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    @user_should_be_a_teacher
+    def post(request, *args, **kwargs):
         current_class_id = int(request.POST["sclass_id"])
         current_class = get_object_or_404(SchoolClass, pk=current_class_id)
 
@@ -35,7 +51,7 @@ class Lessons(View):
         lesson.save()
         return redirect(f"/teacher/lessons/#lesson_{lesson.id}")
 
-
+@user_should_be_a_teacher
 def lesson_details(request, lesson_id):
     lesson = get_object_or_404(Lesson, pk=lesson_id)
 
@@ -55,6 +71,7 @@ def lesson_details(request, lesson_id):
         "students": students,
     })
 
+@user_should_be_a_teacher
 def set_grade(request, lesson_id):
     if request.method == "POST":
         current_student = get_object_or_404(User, pk=int(request.POST["student_id"]))
