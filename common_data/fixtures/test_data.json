@@ -1,0 +1,71 @@
+[
+  {
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+      "name": "teacher",
+      "permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "username": "teacher",
+      "password": "!",
+      "is_superuser": false,
+      "is_staff": false,
+      "is_active": true,
+      "email": "",
+      "first_name": "Test",
+      "last_name": "Teacher",
+      "groups": [1],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "username": "student",
+      "password": "!",
+      "is_superuser": false,
+      "is_staff": false,
+      "is_active": true,
+      "email": "",
+      "first_name": "Test",
+      "last_name": "Student",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "common_data.schoolclass",
+    "pk": 1,
+    "fields": {
+      "class_name": "10-A"
+    }
+  },
+  {
+    "model": "common_data.studentclass",
+    "pk": 1,
+    "fields": {
+      "student": 2,
+      "sclass": 1
+    }
+  },
+  {
+    "model": "common_data.lesson",
+    "pk": 1,
+    "fields": {
+      "name": "Math",
+      "description": "Algebra basics",
+      "date": "2025-01-01",
+      "teacher": 1,
+      "sclass": 1,
+      "homework": "Page 10 exercises",
+      "room": "101",
+      "lesson_type": null
+    }
+  }
+]
